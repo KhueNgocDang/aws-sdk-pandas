@@ -1167,7 +1167,7 @@ def list_query_executions(workgroup: Optional[str] = None, boto3_session: Option
     Examples
     --------
     >>> import awswrangler as wr
-    >>> res = wr.athena.get_query_execution(query_execution_id='query-execution-id')
+    >>> res = wr.athena.list_query_executions(workgroup='workgroup-name')
 
     """
     client_athena: boto3.client = _utils.client(service_name="athena", session=boto3_session)
