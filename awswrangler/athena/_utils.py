@@ -1144,3 +1144,54 @@ def get_query_execution(query_execution_id: str, boto3_session: Optional[boto3.S
         QueryExecutionId=query_execution_id,
     )
     return cast(Dict[str, Any], response["QueryExecution"])
+
+
+def list_query_executions(workgroup: Optional[str] = None, boto3_session: Optional[boto3.Session] = None):
+    """Fetch list query execution IDs ran in specified workgroup or primary work group if not specified.
+
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.list_query_executions
+
+    Parameters
+    ----------
+    workgroup : str
+        The name of the workgroup from which the query_id are being returned.
+        If not specified, a list of available query execution IDs for the queries in the primary workgroup is returned.
+    boto3_session : boto3.Session(), optional
+        Boto3 Session. The default boto3 session will be used if boto3_session receive None.
+
+    Returns
+    -------
+    List[str]
+        List of query execution IDs.
+
+    Examples
+    --------
+    >>> import awswrangler as wr
+    >>> res = wr.athena.get_query_execution(query_execution_id='query-execution-id')
+
+    """
+    client_athena: boto3.client = _utils.client(service_name="athena", session=boto3_session)
+    kwargs: Dict[str, str] = {}
+    if workgroup:
+        kwargs["WorkGroup"] = workgroup
+    query_list: List[str] = []
+    response: Dict[str, Any] = _utils.try_it(
+        f=client_athena.list_query_executions,
+        ex=botocore.exceptions.ClientError,
+        ex_code="ThrottlingException",
+        max_num_tries=5,
+        **kwargs,
+    )
+    if response["QueryExecutionIds"]:
+        query_list += response["QueryExecutionIds"]
+        while "NextToken" in response:
+            kwargs["NextToken"] = response["NextToken"]
+            response = _utils.try_it(
+                f=client_athena.list_query_executions,
+                ex=botocore.exceptions.ClientError,
+                ex_code="ThrottlingException",
+                max_num_tries=5,
+                **kwargs,
+            )
+            query_list += response["QueryExecutionIds"]
+        return query_list
