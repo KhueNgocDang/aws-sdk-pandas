@@ -1195,3 +1195,44 @@ def list_query_executions(workgroup: Optional[str] = None, boto3_session: Option
             )
             query_list += response["QueryExecutionIds"]
         return query_list
+
+
+def get_query_executions(
+    query_execution_ids: List[str], boto3_session: Optional[boto3.Session] = None
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """From specified query execution IDs,
+    return a DataFrame of query execution details from successfully ran queries and a DataFrame contain information about the query executions that failed to run.
+
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.batch_get_query_execution
+
+    Parameters
+    ----------
+    query_execution_ids : List[str]
+        Athena query execution IDs.
+    boto3_session : boto3.Session(), optional
+        Boto3 Session. The default boto3 session will be used if boto3_session receive None.
+
+    Returns
+    -------
+    DataFrame
+        DataFrame contain information about a query execution.
+
+    DataFrame
+        DataFrame contain information about the query executions that failed to run.
+
+    Examples
+    --------
+    >>> import awswrangler as wr
+    >>> query_executions_df,unprocessed_query_executions_df = wr.athena.get_query_executions(query_execution_ids=['query-execution-id','query-execution-id1'])
+
+    """
+    chunked_size: int = 50
+    query_executions: List[Dict[str, Any]] = []
+    unprocessed_query_execution: List[Dict[str, str]] = []
+    client_athena: boto3.client = _utils.client(service_name="athena", session=boto3_session)
+    for i in range(0, len(query_execution_ids), chunked_size):
+        response = client_athena.batch_get_query_execution(QueryExecutionIds=query_execution_ids[i : i + chunked_size])
+        query_executions += response["QueryExecutions"]
+        unprocessed_query_execution += response["UnprocessedQueryExecutionIds"]
+
+    return pd.json_normalize(query_executions), pd.json_normalize(unprocessed_query_execution)
