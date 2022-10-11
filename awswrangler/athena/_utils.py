@@ -1146,7 +1146,7 @@ def get_query_execution(query_execution_id: str, boto3_session: Optional[boto3.S
     return cast(Dict[str, Any], response["QueryExecution"])
 
 
-def list_query_executions(workgroup: Optional[str] = None, boto3_session: Optional[boto3.Session] = None):
+def list_query_executions(workgroup: Optional[str] = None, boto3_session: Optional[boto3.Session] = None) -> List[str]:
     """Fetch list query execution IDs ran in specified workgroup or primary work group if not specified.
 
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.list_query_executions
