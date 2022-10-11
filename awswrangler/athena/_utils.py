@@ -1171,7 +1171,7 @@ def list_query_executions(workgroup: Optional[str] = None, boto3_session: Option
 
     """
     client_athena: boto3.client = _utils.client(service_name="athena", session=boto3_session)
-    kwargs: Dict[str, str] = {}
+    kwargs: Dict[str, Any] = {"base": 1}
     if workgroup:
         kwargs["WorkGroup"] = workgroup
     query_list: List[str] = []
