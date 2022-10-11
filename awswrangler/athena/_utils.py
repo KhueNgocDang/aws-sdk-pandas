@@ -1200,7 +1200,8 @@ def get_query_executions(
     query_execution_ids: List[str], boto3_session: Optional[boto3.Session] = None
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """From specified query execution IDs,
-    return a DataFrame of query execution details from successfully ran queries and a DataFrame contain information about the query executions that failed to run.
+    return a DataFrame of query execution details from successfully ran queries
+    and a DataFrame contain information about the query executions that failed to run.
 
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.batch_get_query_execution
 
@@ -1222,7 +1223,9 @@ def get_query_executions(
     Examples
     --------
     >>> import awswrangler as wr
-    >>> query_executions_df,unprocessed_query_executions_df = wr.athena.get_query_executions(query_execution_ids=['query-execution-id','query-execution-id1'])
+    >>> query_executions_df, unprocessed_query_executions_df = wr.athena.get_query_executions(
+            query_execution_ids=['query-execution-id','query-execution-id1']
+        )
 
     """
     chunked_size: int = 50
