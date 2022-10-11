@@ -1224,7 +1224,6 @@ def get_query_executions(
     >>> query_executions_df, unprocessed_query_executions_df = wr.athena.get_query_executions(
             query_execution_ids=['query-execution-id','query-execution-id1']
         )
-
     """
     chunked_size: int = 50
     query_executions: List[Dict[str, Any]] = []
