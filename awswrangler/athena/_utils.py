@@ -1182,19 +1182,18 @@ def list_query_executions(workgroup: Optional[str] = None, boto3_session: Option
         max_num_tries=5,
         **kwargs,
     )
-    if response["QueryExecutionIds"]:
+    query_list += response["QueryExecutionIds"]
+    while "NextToken" in response:
+        kwargs["NextToken"] = response["NextToken"]
+        response = _utils.try_it(
+            f=client_athena.list_query_executions,
+            ex=botocore.exceptions.ClientError,
+            ex_code="ThrottlingException",
+            max_num_tries=5,
+            **kwargs,
+        )
         query_list += response["QueryExecutionIds"]
-        while "NextToken" in response:
-            kwargs["NextToken"] = response["NextToken"]
-            response = _utils.try_it(
-                f=client_athena.list_query_executions,
-                ex=botocore.exceptions.ClientError,
-                ex_code="ThrottlingException",
-                max_num_tries=5,
-                **kwargs,
-            )
-            query_list += response["QueryExecutionIds"]
-        return query_list
+    return query_list
 
 
 def get_query_executions(
